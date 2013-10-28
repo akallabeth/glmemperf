@@ -3,7 +3,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := glmemperf
 LOCAL_CXXFLAGS := -DSUPPORT_ANDROID -DPACKAGE_VERSION="\"1.0\"" -DPREFIX="\".\""
-LOCAL_LDLIBS := -landroid -llog -lGLESv2 -lEGL
+LOCAL_LDLIBS := -landroid -llog -lGLESv2 -lEGL -ldl
 LOCAL_STATIC_LIBRARIES := android_native_app_glue
 
 LOCAL_CPP_FEATURES += exceptions
@@ -16,7 +16,8 @@ LOCAL_SRC_FILES := \
         ../runner_android.cpp \
         ../shaderblittest.cpp \
         ../test.cpp \
-        ../util.cpp
+        ../util.cpp \
+				../android_graphic_buffer_wrapper.c
 
 include $(BUILD_SHARED_LIBRARY)
 
