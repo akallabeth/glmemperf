@@ -35,6 +35,7 @@
 enum CPUInterleavingMethod
 {
     CPUI_TEXTURE_UPLOAD,
+    CPUI_TEXTURE_SUB_UPLOAD,
     CPUI_XSHM_IMAGE,
     /*CPUI_XSHM_PIXMAP, xshm pixmaps are generally not supported anymore */
 		CPUI_GRAPHIC_BUFFER_UPLOAD,

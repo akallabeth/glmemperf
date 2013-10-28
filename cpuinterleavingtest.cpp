@@ -126,12 +126,30 @@ void CPUInterleavingTest::prepare()
     switch (m_method)
     {
     case CPUI_TEXTURE_UPLOAD:
-        {
+				{
             m_dataStride = m_width * m_dataBitsPerPixel / 8;
             for (i = 0; i < m_buffers; i++)
             {
                 m_textureData[i] = new char[m_height * m_dataStride];
             }
+        }
+				break;
+
+    case CPUI_TEXTURE_SUB_UPLOAD:
+        {
+            m_dataStride = m_width * m_dataBitsPerPixel / 8;
+            for (i = 0; i < m_buffers; i++)
+            {
+                m_textureData[i] = new char[m_height * m_dataStride];
+
+				        if (m_dataBitsPerPixel == 32)
+            				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0,
+                         GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+				        else
+        				    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0,
+                         GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+            }
+
         }
         break;
 #if defined(SUPPORT_ANDROID)
@@ -327,6 +345,7 @@ void CPUInterleavingTest::teardown()
     switch (m_method)
     {
     case CPUI_TEXTURE_UPLOAD:
+    case CPUI_TEXTURE_SUB_UPLOAD:
         {
             for (i = 0; i < m_buffers; i++)
             {
@@ -408,6 +427,9 @@ std::string CPUInterleavingTest::name() const
     case CPUI_TEXTURE_UPLOAD:
         s << "texupload";
         break;
+    case CPUI_TEXTURE_SUB_UPLOAD:
+        s << "tex_sub_upload";
+        break;
     case CPUI_XSHM_IMAGE:
         s << "shmimage";
         break;
@@ -484,6 +506,19 @@ void CPUInterleavingTest::operator()(int frame)
         else
         {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0,
+                         GL_RGB, GL_UNSIGNED_SHORT_5_6_5, m_textureData[m_writeBuffer]);
+        }
+        break;
+
+    case CPUI_TEXTURE_SUB_UPLOAD:
+        if (m_dataBitsPerPixel == 32)
+        {
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, 
+                         GL_RGBA, GL_UNSIGNED_BYTE, m_textureData[m_writeBuffer]);
+        }
+        else
+        {
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height,
                          GL_RGB, GL_UNSIGNED_SHORT_5_6_5, m_textureData[m_writeBuffer]);
         }
         break;
