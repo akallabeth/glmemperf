@@ -5,6 +5,9 @@
     ADD_TEST(ClearTest());
 
     // Normal blits
+    ADD_TEST(BlitTest(GL_RGBA, GL_UNSIGNED_BYTE,              1920, 1080, "data/water2_1920x1080_rgba8888.raw"));
+    ADD_TEST(BlitTest(GL_RGBA, GL_UNSIGNED_BYTE,              1280, 720, "data/water2_1280x720_rgba8888.raw"));
+    
     ADD_TEST(BlitTest(GL_RGBA, GL_UNSIGNED_BYTE,              800, 480, "data/water2_800x480_rgba8888.raw"));
     ADD_TEST(BlitTest(GL_RGB,  GL_UNSIGNED_BYTE,              800, 480, "data/water2_800x480_rgb888.raw"));
     ADD_TEST(BlitTest(GL_RGBA, GL_UNSIGNED_BYTE,              864, 480, "data/water2_864x480_rgba8888.raw"));
@@ -12,18 +15,22 @@
     ADD_TEST(BlitTest(GL_RGBA, GL_UNSIGNED_BYTE,             1024, 512, "data/digital_nature2_1024x512_rgba8888.raw", false, 800.0 / 1024, 480.0 / 512));
     ADD_TEST(BlitTest(GL_RGB,  GL_UNSIGNED_SHORT_5_6_5,       800, 480, "data/water2_800x480_rgb565.raw"));
     ADD_TEST(BlitTest(GL_RGB,  GL_UNSIGNED_SHORT_5_6_5,      1024, 512, "data/digital_nature2_1024x512_rgb565.raw", false, 800.0 / 1024, 480.0 / 512));
+
     if (isPVR)
     {
         ADD_TEST(BlitTest(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG, 0, 1024, 512, "data/abstract3_1024x512_pvrtc4.raw", false, 800.0 / 1024, 480.0 / 512));
         ADD_TEST(BlitTest(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG, 0, 1024, 512, "data/abstract3_1024x512_pvrtc2.raw", false, 800.0 / 1024, 480.0 / 512));
     }
+
     ADD_TEST(BlitTest(GL_ETC1_RGB8_OES,                   0, 1024, 512, "data/abstract3_1024x512_etc1.raw", false, 800.0 / 1024, 480.0 / 512));
     ADD_TEST(BlitTest(GL_LUMINANCE, GL_UNSIGNED_BYTE,         800, 480, "data/abstract3_04_800x480_r8.raw"));
     ADD_TEST(BlitTest(GL_LUMINANCE, GL_UNSIGNED_BYTE,        1024, 512, "data/abstract3_04_1024x512_r8.raw", false, 800.0 / 1024, 480.0 / 512));
+
 #if defined(SUPPORT_X11)
     ADD_TEST(PixmapBlitTest(w, h, ctx.config));
     ADD_TEST(PixmapBlitTest(w, h, config32));
 #endif // SUPPORT_X11
+
     ADD_TEST(FBOBlitTest(GL_RGBA, GL_UNSIGNED_BYTE,          w, h));
     ADD_TEST(FBOBlitTest(GL_RGBA, GL_UNSIGNED_BYTE,          1024, 512, false, w / 1024, h / 512));
     ADD_TEST(FBOBlitTest(GL_RGB,  GL_UNSIGNED_SHORT_5_6_5,   w, h));
@@ -37,16 +44,19 @@
     ADD_TEST(BlitTest(GL_RGBA, GL_UNSIGNED_BYTE,              512, 1024, "data/digital_nature2_512x1024_rgba8888.raw", true, 480.0 / 512, 800.0 / 1024));
     ADD_TEST(BlitTest(GL_RGB,  GL_UNSIGNED_SHORT_5_6_5,       480,  800, "data/water2_480x800_rgb565.raw", true));
     ADD_TEST(BlitTest(GL_RGB,  GL_UNSIGNED_SHORT_5_6_5,       512, 1024, "data/digital_nature2_512x1024_rgb565.raw", true, 480.0 / 512, 800.0 / 1024));
+
     if (isPVR)
     {
         ADD_TEST(BlitTest(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG, 0,  512, 1024, "data/abstract3_512x1024_pvrtc4.raw", true, 480.0 / 512, 800.0 / 1024));
         ADD_TEST(BlitTest(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG, 0,  512, 1024, "data/abstract3_512x1024_pvrtc2.raw", true, 480.0 / 512, 800.0 / 1024));
     }
     ADD_TEST(BlitTest(GL_ETC1_RGB8_OES,                   0,  512, 1024, "data/abstract3_512x1024_etc1.raw", true, 480.0 / 512, 800.0 / 1024));
+
 #if defined(SUPPORT_X11)
     ADD_TEST(PixmapBlitTest(h, w, ctx.config, true));
     ADD_TEST(PixmapBlitTest(h, w, config32,   true));
 #endif // SUPPORT_X11
+
     ADD_TEST(FBOBlitTest(GL_RGBA, GL_UNSIGNED_BYTE,        w, h, true, h / w, w / h));
     ADD_TEST(FBOBlitTest(GL_RGBA, GL_UNSIGNED_BYTE,        1024, 512, true, h / 512, w / 1024));
     ADD_TEST(FBOBlitTest(GL_RGB,  GL_UNSIGNED_SHORT_5_6_5, w, h, true, h / w, w / h));
@@ -137,6 +147,15 @@
     ADD_TEST(CPUInterleavingTest(CPUI_TEXTURE_UPLOAD, 2, 16, wPOT, hPOT));
     ADD_TEST(CPUInterleavingTest(CPUI_TEXTURE_UPLOAD, 2, 32, wPOT, hPOT));
 
+#if defined(SUPPORT_ANDROID)
+    ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 16, winWidth, winHeight));
+    ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 32, winWidth, winHeight));
+		ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 16, 1920, 1080));
+    ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 32, 1920, 1080));
+    ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 16, wPOT, hPOT));
+    ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 32, wPOT, hPOT));
+#endif
+		
 #if !defined(SUPPORT_ANDROID)
     ADD_TEST(CPUInterleavingTest(CPUI_EGL_LOCK_SURFACE, 2, 16, winWidth, winHeight));
     ADD_TEST(CPUInterleavingTest(CPUI_EGL_LOCK_SURFACE, 2, 32, winWidth, winHeight));
