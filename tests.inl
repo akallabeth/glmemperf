@@ -147,11 +147,14 @@
     ADD_TEST(CPUInterleavingTest(CPUI_TEXTURE_UPLOAD, 2, 16, wPOT, hPOT));
     ADD_TEST(CPUInterleavingTest(CPUI_TEXTURE_UPLOAD, 2, 32, wPOT, hPOT));
 
+    ADD_TEST(CPUInterleavingTest(CPUI_TEXTURE_SUB_UPLOAD, 2, 16, winWidth, winHeight));
+    ADD_TEST(CPUInterleavingTest(CPUI_TEXTURE_SUB_UPLOAD, 2, 32, winWidth, winHeight));
+    ADD_TEST(CPUInterleavingTest(CPUI_TEXTURE_SUB_UPLOAD, 2, 16, wPOT, hPOT));
+    ADD_TEST(CPUInterleavingTest(CPUI_TEXTURE_SUB_UPLOAD, 2, 32, wPOT, hPOT));
+
 #if defined(SUPPORT_ANDROID)
     ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 16, winWidth, winHeight));
     ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 32, winWidth, winHeight));
-		ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 16, 1920, 1080));
-    ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 32, 1920, 1080));
     ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 16, wPOT, hPOT));
     ADD_TEST(CPUInterleavingTest(CPUI_GRAPHIC_BUFFER_UPLOAD, 2, 32, wPOT, hPOT));
 #endif
