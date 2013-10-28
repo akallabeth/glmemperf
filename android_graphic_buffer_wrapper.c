@@ -79,19 +79,10 @@ typedef	void (*t_dtor)(void *);
 
 typedef	int (*t_init_check)(void *);
 
-typedef	uint32_t (*t_get_width)(void *handle);
-typedef	uint32_t (*t_get_height)(void *handle);
-typedef	uint32_t (*t_get_stride)(void *handle);
-typedef	uint32_t (*t_get_usage)(void *handle);
-typedef	uint32_t (*t_get_pixel_format)(void *handle);
-typedef	t_agbw_rect (*t_get_bounds)(void *handle);
-
 typedef	int (*t_reallocate)(void *handle, uint32_t w, uint32_t h,
 	uint32_t f, uint32_t usage);
 
 typedef	int (*t_lock)(void *handle, uint32_t usage, void **vaddr);
-typedef	int (*t_lock_rect)(void *handle, uint32_t usage,
-	const t_agbw_rect *rect, void **vaddr);
 typedef	int (*t_lock_surface)(void *handle, EGLSurface *surface,
 	uint32_t usage);
 typedef	int (*t_unlock)(void *handle);
@@ -116,17 +107,9 @@ typedef struct
 
 	t_init_check init_check;
 
-	t_get_width get_width;
-	t_get_height get_height;
-	t_get_stride get_stride;
-	t_get_usage get_usage;
-	t_get_pixel_format get_pixel_format;
-	t_get_bounds get_bounds;
-
 	t_reallocate reallocate;
 	
 	t_lock lock;
-	t_lock_rect lock_rect;
 	t_lock_surface lock_surface;
 
 	t_unlock unlock;
@@ -149,15 +132,8 @@ enum
 	SYM_CTOR_WINDOW,
 	SYM_DTOR,
 	SYM_INIT_CHECK,
-	SYM_GET_WIDTH,
-	SYM_GET_HEIGHT,
-	SYM_GET_STRIDE,
-	SYM_GET_USAGE,
-	SYM_GET_PIXEL_FMT,
-	SYM_GET_BOUNDS,
 	SYM_REALLOCATE,
 	SYM_LOCK,
-	SYM_LOCK_RECT,
 	SYM_LOCK_SURFACE,
 	SYM_UNLOCK,
 	SYM_GET_NATIVE,
@@ -174,15 +150,8 @@ static const char *agbw_symbols[] =
 	"_ZN7android13GraphicBufferC1EP19ANativeWindowBufferb",
 	"_ZN7android13GraphicBufferD1Ev",
 	"_ZNK7android13GraphicBuffer9initCheckEv",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
 	"_ZN7android13GraphicBuffer10reallocateEjjij",
 	"_ZN7android13GraphicBuffer4lockEjPPv",
-	"_ZN7android13GraphicBuffer4lockEjRKNS_4RectEPPv",
 	"_ZN7android19GraphicBufferMapper4lockEPK13native_handleiRKNS_4RectEPPv",
 	"_ZN7android13GraphicBuffer6unlockEv",
 	"_ZNK7android13GraphicBuffer15getNativeBufferEv",
@@ -203,15 +172,8 @@ static void dump_pointer(const t_agbw_handle *hdl)
 		INFO("hdl->ctor_from_handle = %p", hdl->ctor_from_handle);
 		INFO("hdl->dtor             = %p", hdl->dtor);
 		INFO("hdl->init_check       = %p", hdl->init_check);
-		INFO("hdl->get_width        = %p", hdl->get_width);
-		INFO("hdl->get_height       = %p", hdl->get_height);
-		INFO("hdl->get_stride       = %p", hdl->get_stride);
-		INFO("hdl->get_usage        = %p", hdl->get_usage);
-		INFO("hdl->get_pixel_format = %p", hdl->get_pixel_format);
-		INFO("hdl->get_bounds       = %p", hdl->get_bounds);
 		INFO("hdl->reallocate       = %p", hdl->reallocate);
 		INFO("hdl->lock             = %p", hdl->lock);
-		INFO("hdl->lock_rect        = %p", hdl->lock_rect);
 		INFO("hdl->lock_surface     = %p", hdl->lock_surface);
 		INFO("hdl->unlock           = %p", hdl->unlock);
 		INFO("hdl->get_native_buffer= %p", hdl->get_native_buffer);
@@ -246,8 +208,6 @@ static bool handle_valid(const t_agbw_handle *hdl)
 	if (!hdl->dtor)
 		rc = false;
 	if (!hdl->lock)
-		rc = false;
-	if (!hdl->lock_rect)
 		rc = false;
 	if (!hdl->lock_surface)
 		rc = false;
@@ -359,48 +319,6 @@ static t_agbw_handle *load_function_pointer(void)
 		goto cleanup;
 	}
 
-	hdl->get_width = (t_get_width)dlsym(hdl->dlhandle,
-			agbw_symbols[SYM_GET_WIDTH]);
-	if (!hdl->get_width)
-	{
-		ERROR("[dlsym] [%s]: %s", dlerror(), agbw_symbols[SYM_GET_WIDTH]);
-	}
-
-	hdl->get_height = (t_get_height)dlsym(hdl->dlhandle,
-			agbw_symbols[SYM_GET_HEIGHT]);
-	if (!hdl->get_height)
-	{
-		ERROR("[dlsym] [%s]: %s", dlerror(), agbw_symbols[SYM_GET_HEIGHT]);
-	}
-
-	hdl->get_stride = (t_get_stride)dlsym(hdl->dlhandle,
-			agbw_symbols[SYM_GET_STRIDE]);
-	if (!hdl->get_stride)
-	{
-		ERROR("[dlsym] [%s]: %s", dlerror(), agbw_symbols[SYM_GET_STRIDE]);
-	}
-
-	hdl->get_usage = (t_get_usage)dlsym(hdl->dlhandle,
-			agbw_symbols[SYM_GET_USAGE]);
-	if (!hdl->get_usage)
-	{
-		ERROR("[dlsym] [%s]: %s", dlerror(), agbw_symbols[SYM_GET_USAGE]);
-	}
-
-	hdl->get_pixel_format = (t_get_pixel_format)dlsym(hdl->dlhandle,
-			agbw_symbols[SYM_GET_PIXEL_FMT]);
-	if (!hdl->get_pixel_format)
-	{
-		ERROR("[dlsym] [%s]: %s", dlerror(), agbw_symbols[SYM_GET_PIXEL_FMT]);
-	}
-
-	hdl->get_bounds = (t_get_bounds)dlsym(hdl->dlhandle,
-			agbw_symbols[SYM_GET_BOUNDS]);
-	if (!hdl->get_bounds)
-	{
-		ERROR("[dlsym] [%s]: %s", dlerror(), agbw_symbols[SYM_GET_BOUNDS]);
-	}
-
 	hdl->reallocate = (t_reallocate)dlsym(hdl->dlhandle,
 			agbw_symbols[SYM_REALLOCATE]);
 	if (!hdl->reallocate)
@@ -414,14 +332,6 @@ static t_agbw_handle *load_function_pointer(void)
 	if (!hdl->lock)
 	{
 		ERROR("[dlsym] [%s]: %s", dlerror(), agbw_symbols[SYM_LOCK]);
-		goto cleanup;
-	}
-
-	hdl->lock_rect = (t_lock_rect)dlsym(hdl->dlhandle,
-			agbw_symbols[SYM_LOCK_RECT]);
-	if (!hdl->lock_rect)
-	{
-		ERROR("[dlsym] [%s]: %s", dlerror(), agbw_symbols[SYM_LOCK_RECT]);
 		goto cleanup;
 	}
 
@@ -580,84 +490,6 @@ int agbw_init_check(void *handle)
 	return status;
 }
 
-uint32_t agbw_get_width(void *handle)
-{
-	uint32_t rc = 0;
-	t_agbw_handle *hdl = (t_agbw_handle*)handle;
-
-	DEBUG("hdl=%p", handle);
-
-	if (handle_valid(hdl))
-		rc = hdl->get_width(hdl->instance);
-
-	return rc;
-}
-
-uint32_t agbw_get_height(void *handle)
-{
-	uint32_t rc = 0;
-	t_agbw_handle *hdl = (t_agbw_handle*)handle;
-
-	DEBUG("hdl=%p", handle);
-
-	if (handle_valid(hdl))
-		rc = hdl->get_height(hdl->instance);
-
-	return rc;
-}
-
-uint32_t agbw_get_stride(void *handle)
-{
-	uint32_t rc = 0;
-	t_agbw_handle *hdl = (t_agbw_handle*)handle;
-
-	DEBUG("hdl=%p", handle);
-
-	if (handle_valid(hdl))
-		rc = hdl->get_stride(hdl->instance);
-
-	return rc;
-}
-
-uint32_t agbw_get_usage(void *handle)
-{
-	uint32_t rc = 0;
-	t_agbw_handle *hdl = (t_agbw_handle*)handle;
-
-	DEBUG("hdl=%p", handle);
-
-	if (handle_valid(hdl))
-		rc = hdl->get_usage(hdl->instance);
-
-	return rc;
-}
-
-uint32_t agbw_get_pixel_format(void *handle)
-{
-	uint32_t rc = 0;
-	t_agbw_handle *hdl = (t_agbw_handle*)handle;
-
-	DEBUG("hdl=%p", handle);
-
-	if (handle_valid(hdl))
-		rc = hdl->get_pixel_format(hdl->instance);
-
-	return rc;
-}
-
-t_agbw_rect agbw_get_bounds(void *handle)
-{
-	t_agbw_rect rect;
-	t_agbw_handle *hdl = (t_agbw_handle*)handle;
-
-	DEBUG("hdl=%p", handle);
-
-	if (handle_valid(hdl))
-		rect = hdl->get_bounds(hdl->instance);
-
-	return rect;
-}
-
 int agbw_reallocate(void *handle, uint32_t w, uint32_t h,
 		uint32_t f, uint32_t usage)
 {
@@ -682,20 +514,6 @@ int agbw_lock(void *handle, uint32_t usage, void **vaddr)
 
 	if (handle_valid(hdl))
 		status = hdl->lock(hdl->instance, usage, vaddr);
-
-	return status;
-}
-
-int agbw_lock_rect(void *handle, uint32_t usage, const t_agbw_rect *rect,
-	void **vaddr)
-{
-	int status;
-	t_agbw_handle *hdl = (t_agbw_handle*)handle;
-
-	DEBUG("hdl=%p", handle);
-
-	if (handle_valid(hdl))
-		status = hdl->lock_rect(hdl->instance, usage, rect, vaddr);
 
 	return status;
 }

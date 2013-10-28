@@ -109,14 +109,6 @@ enum {
 #define ANativeWindowBuffer void
 #define native_handle_t void
 
-typedef struct
-{
-	long bottom;
-	long left;
-	long right;
-	long top;
-} t_agbw_rect;
-
 void *agbw_new(void);
 void *agbw_new_wh(uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
 void *agbw_new_from_window(ANativeWindowBuffer *buffer, bool keep_ownership);
@@ -128,19 +120,10 @@ void agbw_free(void *handle);
 
 int agbw_init_check(void *handle);
 
-uint32_t agbw_get_width(void *handle);
-uint32_t agbw_get_height(void *handle);
-uint32_t agbw_get_stride(void *handle);
-uint32_t agbw_get_usage(void *handle);
-uint32_t agbw_get_pixel_format(void *handle);
-t_agbw_rect agbw_get_bounds(void *handle);
-
 int agbw_reallocate(void *handle, uint32_t w, uint32_t h,
 		uint32_t f, uint32_t usage);
 
 int agbw_lock(void *handle, uint32_t usage, void **vaddr);
-int agbw_lock_rect(void *handle, uint32_t usage,
-		const t_agbw_rect *rect, void **vaddr);
 int agbw_lock_surface(void *handle, EGLSurface *surface,
 		uint32_t usage);
 int agbw_unlock(void *handle);
