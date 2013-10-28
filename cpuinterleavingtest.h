@@ -37,6 +37,7 @@ enum CPUInterleavingMethod
     CPUI_TEXTURE_UPLOAD,
     CPUI_XSHM_IMAGE,
     /*CPUI_XSHM_PIXMAP, xshm pixmaps are generally not supported anymore */
+		CPUI_GRAPHIC_BUFFER_UPLOAD,
     CPUI_IMG_TEXTURE_STREAMING,
     CPUI_PIXEL_BUFFER_OBJECT,
     CPUI_EGL_LOCK_SURFACE,
@@ -57,6 +58,14 @@ class CPUInterleavingTest: public BlitTest
 
     int m_readBuffer;
     int m_writeBuffer;
+
+		void **m_buffer;
+
+		uint8_t **m_npixmaps;
+		size_t m_pixmap_pos;
+		size_t m_pixmap_size;
+
+		void* m_gbuffers[CPUI_MAX_BUFFERS];
 
     NativePixmapType m_pixmaps[CPUI_MAX_BUFFERS];
     EGLSurface m_surfaces[CPUI_MAX_BUFFERS];
