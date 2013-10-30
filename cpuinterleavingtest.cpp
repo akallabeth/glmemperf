@@ -155,45 +155,33 @@ void CPUInterleavingTest::prepare()
         break;
 #if defined(SUPPORT_ANDROID)
 		case CPUI_GRAPHIC_BUFFER_UPLOAD:
-			 prepareEGLImageExtension();
+				prepareEGLImageExtension();
 
-			 m_npixmaps = (uint8_t**)calloc(sizeof(uint8_t*), m_buffers);
-			 m_buffer = (void**)calloc(sizeof(void*), m_buffers);
-					for (i = 0; i < m_buffers; i++)
-					{/*
-							success = nativeCreatePixmap(ctx.nativeDisplay, ctx.dpy,
-																					 m_config, m_width, m_height, &m_pixmaps[i]);
-							ASSERT(success);
+				m_buffer = (void**)calloc(sizeof(void*), m_buffers);
+				assert(m_buffer);
 
-							m_surfaces[i] = eglCreatePixmapSurface(ctx.dpy, m_config, m_pixmaps[i], NULL);
-							ASSERT(m_surfaces[i] != EGL_NO_SURFACE);
-							*/
-						m_npixmaps[i] = (uint8_t*)malloc(m_width * m_height * 4);
-						for (int x=0; x<m_width * m_height * 4; x++)
-							m_npixmaps[i][x] = rand();
-
-						m_buffer[i] = agbw_new_wh(m_width, m_height, 4,
+				m_dataStride = m_width * m_dataBitsPerPixel / 8;
+				for (i = 0; i < m_buffers; i++)
+				{
+						m_textureData[i] = new char[m_height * m_dataStride];
+						m_buffer[i] = agbw_new_wh(m_width, m_height, (m_dataBitsPerPixel == 32) ? 1 : 4,
 								USAGE_SW_WRITE_OFTEN | USAGE_HW_TEXTURE);
 
-//							m_npixmaps[i] = (uint8_t*)agbw_get_native_buffer(m_buffer[i]);
+						// Create an EGL image from the pixmap
+						EGLint eglImgAttrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE, EGL_NONE };
+						m_images[i] = m_eglCreateImageKHR(ctx.dpy, EGL_NO_CONTEXT,
+																							EGL_NATIVE_BUFFER_ANDROID,
+																							(EGLClientBuffer)agbw_get_native_buffer(m_buffer[i]),
+																							eglImgAttrs);
+						ASSERT(m_images[i]);
 
-							// Create an EGL image from the pixmap
-							EGLint eglImgAttrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE, EGL_NONE };
-							m_images[i] = m_eglCreateImageKHR(ctx.dpy, EGL_NO_CONTEXT,
-																								EGL_NATIVE_BUFFER_ANDROID,
-																								(EGLClientBuffer)agbw_get_native_buffer(m_buffer[i]),
-																								eglImgAttrs);
-							ASSERT(m_images[i]);
+						// Bind the image to a texture
+						glBindTexture(GL_TEXTURE_2D, m_textures[i]);
+						m_glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_images[i]);
+						ASSERT_GL();
 
-							// Bind the image to a texture
-							glBindTexture(GL_TEXTURE_2D, m_textures[i]);
-							m_glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_images[i]);
-							ASSERT_GL();
-
-							m_textureData[i] = (char*)m_npixmaps[i];
-              m_dataStride = m_width;
-              m_writeCompleted[i] = true;
-					}
+						m_writeCompleted[i] = true;
+				}
 				break;
 #endif
 #if defined(SUPPORT_X11)
@@ -357,21 +345,16 @@ void CPUInterleavingTest::teardown()
 #if defined(SUPPORT_ANDROID)
     case CPUI_GRAPHIC_BUFFER_UPLOAD:
         {
-					assert(m_npixmaps);
 					assert(m_buffer);
 
             for (i = 0; i < m_buffers; i++)
             {
                 m_eglDestroyImageKHR(ctx.dpy, m_images[i]);
 								agbw_free(m_buffer[i]);
-								if (m_npixmaps[i])
-									free(m_npixmaps[i]);
-
+                delete[] m_textureData[i];
             }
-						free(m_npixmaps);
 						free(m_buffer);
 
-						m_npixmaps = NULL;
 						m_buffer = NULL;
         }
         break;
@@ -528,7 +511,7 @@ void CPUInterleavingTest::operator()(int frame)
 				{
 				unsigned char* bits = NULL;
 				agbw_lock(m_buffer[m_writeBuffer], USAGE_SW_WRITE_OFTEN, (void**)&bits);
-				memcpy(bits, m_textureData[m_writeBuffer], m_width * m_height);
+				memcpy(bits, m_textureData[m_writeBuffer], m_height * m_dataStride);
 				agbw_unlock(m_buffer[m_writeBuffer]);
 				}
 				break;

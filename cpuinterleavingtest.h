@@ -62,10 +62,6 @@ class CPUInterleavingTest: public BlitTest
 
 		void **m_buffer;
 
-		uint8_t **m_npixmaps;
-		size_t m_pixmap_pos;
-		size_t m_pixmap_size;
-
 		void* m_gbuffers[CPUI_MAX_BUFFERS];
 
     NativePixmapType m_pixmaps[CPUI_MAX_BUFFERS];
